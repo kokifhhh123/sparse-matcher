@@ -7,39 +7,65 @@ import os
 import time
 from .mlp_module import MLP_module_4_short, MLP_module_8_short, MLP_module_16_short
 import argparse
-import numpy as np
+import random
+from torch.nn.functional import pad
+
 '''
 python -m mlp.mlp_train
 nohup python3 -u -m mlp.mlp_train \
     --type 4_short \
     --folder_path /home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/short/pair/dim4/ \
-    >/home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/short/log_short/pair/pair_log_4_2.txt 2>&1 &
-
+    >/home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/short/log_short/pair/pair_log_4_TEST.txt 2>&1 &
 '''
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-EPOCH = 300
-FEATURE_PATH = '/home/koki/Sparse_Matcher/data/Megadepth/Superpoint_features/scene_no_15_22_features/'
+EPOCH = 400
+FEATURE_PATH = '/home/koki/Sparse_Matcher/data/Megadepth/Superpoint_features/scene_no_15_22_features/sp_feature2.pth'
+# FEATURE_PATH = '/home/koki/Sparse_Matcher/data/Megadepth/Superpoint_features/scene_no_15_22_features/sp_feature_test.pth'
 BATCH_SIZE = 64
 
 class MLPDataset(Dataset):
     def __init__(self):
-        self.feature_path = FEATURE_PATH
-        self.all_files = os.listdir(self.feature_path)
+        self.feature = torch.load(FEATURE_PATH)
 
     def __getitem__(self, index):
-        feat_path = self.feature_path + self.all_files[index]
-        feats = np.load(feat_path)
-        feats = torch.from_numpy(feats).to(device)
-        desc0 = feats[0]
-        desc1 = feats[1]
-        desc_match0 = feats[2]
-        desc_match1 = feats[3]
+        feats = self.feature[index]
+        
+        desc0 = feats[0].cuda()
+        desc1 = feats[1].cuda()
+        m0    = feats[2]
+
+        m0_vailid = m0>-1
+        padding_m = (0,1024-len(m0_vailid))
+
+        # print('m0 len: ',len(m0_vailid))
+        m0_vailid = pad(m0_vailid, padding_m, "constant" ,value=False)
+        m0        = pad(m0,        padding_m, "constant", value=0)
+
+        match0      = m0[m0_vailid]
+        desc_match0 = desc0[m0_vailid]
+        
+
+        length = len(desc_match0)
+        desc_match1 = torch.zeros([length,256])
+
+
+        for i in range(length):
+            index = match0[i]
+            desc_match1[i][:] = desc1[index][:]
+        
+        padding_m = (0, 0, 0, 1024-length)
+        desc_match0 = pad(desc_match0, padding_m).cuda()
+        desc_match1 = pad(desc_match1, padding_m).cuda()
 
         return desc0, desc1, desc_match0, desc_match1
 
     def __len__(self):
-        return len(self.all_files)
+        return len(self.feature)
+
+
+
 
 def train_one_epoch():
     running_loss = 0.
@@ -56,7 +82,7 @@ def train_one_epoch():
 
         loss0 = loss_fn(d0, d0_back)
         loss1 = loss_fn(d1, d1_back)
-        lossm = loss_fn(dm0_back, dm1_back)
+        lossm = loss_fn(dm0_back, dm1_back) * 2 
         loss = loss0 + loss1 + lossm
         
         
@@ -64,12 +90,11 @@ def train_one_epoch():
         optimizer.step()
 
         running_loss += loss.item()
-        if i % 100 == 99:
-            last_loss = running_loss / 100 # loss per batch
+        if i % 50 == 49:
+            last_loss = running_loss / 50 # loss per batch
             print('batch {} loss: {}'.format(i + 1, last_loss))
             running_loss = 0.
-
-
+        
     return last_loss
 
 if __name__ == "__main__":
@@ -94,12 +119,16 @@ if __name__ == "__main__":
     selected_module = mlp_modules[type]
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = selected_module()
+
+    ckpt_path = '/home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/short/pair/dim4/model_20240219_011947_99'
+    ckpt = torch.load(ckpt_path)
+    model.load_state_dict(ckpt)
+
+
     model.to(device)
 
-    dataset = MLPDataset()
-    trainset, valset = random_split(dataset, [0.8, 0.2])
-    trainloader = DataLoader(trainset, batch_size = BATCH_SIZE, shuffle=True, num_workers=4)
-    valloader   = DataLoader(valset, batch_size = BATCH_SIZE, shuffle=True, num_workers=4)
+
+    # all_files = os.listdir(FEATURE_PATH)
     loss_fn = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -111,13 +140,20 @@ if __name__ == "__main__":
     best_vloss = 1_000_000.
     seed = 100
     torch.manual_seed(seed)
+    dataset = MLPDataset()
+    trainset, valset = random_split(dataset, [0.8, 0.2])
+    trainloader = DataLoader(trainset, batch_size = BATCH_SIZE, shuffle=True, num_workers=4)
+    valloader   = DataLoader(valset,   batch_size = BATCH_SIZE, shuffle=True, num_workers=4)
 
 
 
     for epoch in range(EPOCH):
         print('EPOCH {}:'.format(epoch_number + 1))
         start_time = time.time()
+        # random.shuffle(all_files)
 
+        # for file in all_files:
+        
         model.train(True)
         avg_train_loss = train_one_epoch()
 
@@ -134,7 +170,7 @@ if __name__ == "__main__":
 
                 loss0 = loss_fn(d0, d0_back)
                 loss1 = loss_fn(d1, d1_back)
-                lossm = loss_fn(dm0_back, dm1_back)
+                lossm = loss_fn(dm0_back, dm1_back) * 2
                 loss = loss0 + loss1 + lossm
                 running_vloss += loss
 
