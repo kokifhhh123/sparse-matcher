@@ -1,0 +1,16 @@
+{
+    "long":{
+        "nonpair":{
+            "4":"/home/koki/Sparse_Matcher/test_image/mlpckpt/long_non_4/model_20240129_011404_496",
+            "8":"/home/koki/Sparse_Matcher/test_image/mlpckpt/long_non_8/model_20240129_010318_496",
+            "16":"/home/koki/Sparse_Matcher/test_image/mlpckpt/long_non_16/model_20240128_052453_474"
+        }
+    },
+    "short":{
+        "pair":{
+            "4":"/home/koki/Sparse_Matcher/test_image/mlpckpt/short_pair_4/model_20240221_104220_497",
+            "8":"/home/koki/Sparse_Matcher/test_image/mlpckpt/short_pair_8/model_20240221_105112_498",
+            "16":"/home/koki/Sparse_Matcher/test_image/mlpckpt/short_pair_16/model_20240221_105233_496"
+        }
+    }
+}

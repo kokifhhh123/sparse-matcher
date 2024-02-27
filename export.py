@@ -1,10 +1,10 @@
-from superpoint.homography_dataset import HomographyDataset,conf
+from utils.homography_dataset import HomographyDataset,conf
 import numpy as np
 from torch.utils.data import DataLoader
-from superpoint.superpoint import SuperPoint
+from utils.superpoint import SuperPoint
 import torch
 from torch.nn.functional import pad
-from superpoint.utils import gt_matches_from_homography
+from utils.utils import gt_matches_from_homography
 from tqdm import tqdm
 import os
 
