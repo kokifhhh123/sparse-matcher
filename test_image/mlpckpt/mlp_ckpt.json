@@ -1,0 +1,27 @@
+{
+    "long":{
+        "pair":{
+            "4":"/home/koki/Glue/data/Megadepth/MLP_ckpt/long/pair/mlp_pair_dim4/model_20240202_031656_498",
+            "8":"/home/koki/Glue/data/Megadepth/MLP_ckpt/long/pair/mlp_pair_dim8/model_20240202_032211_494",
+            "16":"/home/koki/Glue/data/Megadepth/MLP_ckpt/long/pair/mlp_pair_dim16/model_20240202_032304_485"
+        },
+        "nonpair":{
+            "4":"/home/koki/Glue/data/Megadepth/MLP_ckpt/long/nonpair/mlp_dim4/model_20240129_011404_496",
+            "8":"/home/koki/Glue/data/Megadepth/MLP_ckpt/long/nonpair/mlp_dim8/model_20240129_010318_496",
+            "16":"/mnt/home_6T/public/koki/mlp_ckpt/mlp_no_matcher_dim16_1/model_20240129_020051_497"
+        }
+    },
+    "short":{
+        "pair":{
+            "4":"/home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/1_short/pair/dim4/model_20240219_144904_394",
+            "8":"/home/koki/Sparse_Matcher/data/Megadepth/MLP_ckpt/1_short/pair/dim8/model_20240219_232809_285",
+            "16":"/home/koki/Glue/data/Megadepth/MLP_ckpt/short/pair/dim16/model_20240203_185826_493",
+            "scannet16":"/home/koki/Glue/data/Megadepth/MLP_ckpt/short/pair/scannet_dim16/model_20240129_020051_497"
+        },
+        "nonpair":{
+            "4":"",
+            "8":"",
+            "16":""
+        }
+    }
+}

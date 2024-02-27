@@ -8,7 +8,7 @@ import albumentations as A
 
 conf ={
     "image_dir": '/home/koki/Sparse_Matcher/data/Megadepth/Megadepth/',
-    "image_list": '/home/koki/Sparse_Matcher/megadepth_homography_list_no1522.txt',
+    "image_list": '/home/koki/Sparse_Matcher/data/megadepth_homography_list_no1522.txt',
     "homography": {
         "difficulty": 0.6,
         "translation": 1.0,
@@ -22,7 +22,6 @@ conf ={
 
 
 albumentations_transform = A.Compose([
-    A.RandomRain(p=0.2),
     A.RandomBrightnessContrast(
             brightness_limit=(-0.1, 0),
             contrast_limit=(-0.1, 0),
@@ -73,9 +72,9 @@ class HomographyDataset(Dataset):
         data = sample_homography(image, conf, patch_shape)
 
         image = data["image"]
-        # transformed = self.photo_augment(image=image)
-        # transformed_image = transformed["image"]
-        data["image"] = image.transpose((2, 0, 1))  #HWC to CHW
+        transformed = self.photo_augment(image=image)
+        transformed_image = transformed["image"]
+        data["image"] = transformed_image.transpose((2, 0, 1))  #HWC to CHW
         
         return data
 
@@ -102,5 +101,9 @@ if __name__=="__main__":
     image1 = data['view1']['image']
     coord0 = data['view0']['coords']
     coord1 = data['view1']['coords']
+
+    image0 = image0.transpose((1,2,0))
+    image1 = image1.transpose((1,2,0))
+
     plt.imsave(f'/home/koki/Sparse_Matcher/augment_image0.png',image0)
     plt.imsave(f'/home/koki/Sparse_Matcher/augment_image1.png',image1)

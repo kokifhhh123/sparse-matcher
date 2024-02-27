@@ -1,0 +1,4 @@
+/home/koki/Sparse_Matcher/data/asset/DSC_0410.JPG /home/koki/Sparse_Matcher/data/asset/DSC_0411.JPG
+/home/koki/Sparse_Matcher/data/asset/sacre_coeur1.jpg /home/koki/Sparse_Matcher/data/asset/sacre_coeur2.jpg
+/home/koki/Sparse_Matcher/data/Scannet/images_pose_camera/scene0021_00/color/944.jpg /home/koki/Sparse_Matcher/data/Scannet/images_pose_camera/scene0021_00/color/1000.jpg
+/home/koki/Sparse_Matcher/data/Scannet/images_pose_camera/scene0001_01/color/1000.jpg /home/koki/Sparse_Matcher/data/Scannet/images_pose_camera/scene0001_01/color/1040.jpg
